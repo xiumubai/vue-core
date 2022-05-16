@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      const MyComponent = {
+        render() {
+          return {
+            tag: 'div',
+            props: {
+              onClick: () => alert('hello vue'),
+            },
+            children: 'click me',
+          };
+        },
+      };
+
+      const vnode = {
+        tag: MyComponent,
+      };
+
+      function renderer(vnode, container) {
+        console.log(vnode);
+        if (typeof vnode.tag === 'string') {
+          mountElement(vnode, container);
+        } else if (typeof vnode.tag === 'object') {
+          mountComponent(vnode, container);
+        }
+      }
+
+      function mountElement(vnode, container) {
+        const el = document.createElement(vnode.tag);
+        for (const key in vnode.props) {
+          // 处理事件
+          if (/^on/.test(key)) {
+            el.addEventListener(
+              key.substr(2).toLocaleLowerCase(),
+              vnode.props[key]
+            );
+          }
+        }
+        if (typeof vnode.children === 'string') {
+          el.appendChild(document.createTextNode(vnode.children));
+        } else if (Array.isArray(vnode.children)) {
+          vnode.children.forEach((child) => renderer(child, el));
+        }
+        container.appendChild(el);
+      }
+
+      function mountComponent(vnode, container) {
+        const subtree = vnode.tag.render();
+        console.log(subtree);
+        renderer(subtree, container);
+      }
+
+      renderer(vnode, document.body);
+    </script>
+  </body>
+</html>
